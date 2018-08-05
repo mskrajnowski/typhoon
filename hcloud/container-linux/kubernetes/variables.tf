@@ -3,16 +3,16 @@ variable "cluster_name" {
   description = "Unique cluster name (prepended to dns_zone)"
 }
 
-# Digital Ocean
+# Hetzner Cloud
 
-variable "region" {
+variable "location" {
   type        = "string"
-  description = "Digital Ocean region (e.g. nyc1, sfo2, fra1, tor1)"
+  description = "Hetzner Cloud location (e.g. fsn1, nbg1, hel1)"
 }
 
 variable "dns_zone" {
   type        = "string"
-  description = "Digital Ocean domain (i.e. DNS zone) (e.g. do.example.com)"
+  description = "Cloudflare domain (e.g. k8s.example.com)"
 }
 
 # instances
@@ -31,20 +31,19 @@ variable "worker_count" {
 
 variable "controller_type" {
   type        = "string"
-  default     = "s-2vcpu-2gb"
-  description = "Droplet type for controllers (e.g. s-2vcpu-2gb, s-2vcpu-4gb, s-4vcpu-8gb)."
+  default     = "cx11"
+  description = "Server type for controllers (e.g. cx11, cx21, cx31)."
 }
 
 variable "worker_type" {
   type        = "string"
-  default     = "s-1vcpu-1gb"
-  description = "Droplet type for workers (e.g. s-1vcpu-1gb, s-1vcpu-2gb, s-2vcpu-2gb)"
+  default     = "cx11"
+  description = "Server type for workers (e.g. cx11, cx21, cx31)"
 }
 
 variable "image" {
   type        = "string"
-  default     = "coreos-stable"
-  description = "Container Linux image for instances (e.g. coreos-stable)"
+  description = "Container Linux snapshot id for instances"
 }
 
 variable "controller_clc_snippets" {

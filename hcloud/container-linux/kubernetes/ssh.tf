@@ -4,7 +4,7 @@ resource "null_resource" "copy-controller-secrets" {
 
   connection {
     type    = "ssh"
-    host    = "${element(concat(digitalocean_droplet.controllers.*.ipv4_address), count.index)}"
+    host    = "${element(concat(hcloud_server.controllers.*.ipv4_address), count.index)}"
     user    = "core"
     timeout = "15m"
   }
@@ -72,7 +72,7 @@ resource "null_resource" "copy-worker-secrets" {
 
   connection {
     type    = "ssh"
-    host    = "${element(concat(digitalocean_droplet.workers.*.ipv4_address), count.index)}"
+    host    = "${element(concat(hcloud_server.workers.*.ipv4_address), count.index)}"
     user    = "core"
     timeout = "15m"
   }
@@ -100,7 +100,7 @@ resource "null_resource" "bootkube-start" {
 
   connection {
     type    = "ssh"
-    host    = "${digitalocean_droplet.controllers.0.ipv4_address}"
+    host    = "${hcloud_server.controllers.0.ipv4_address}"
     user    = "core"
     timeout = "15m"
   }

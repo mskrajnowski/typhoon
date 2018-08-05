@@ -1,5 +1,5 @@
 # Worker DNS records
-resource "digitalocean_record" "workers" {
+resource "cloudflare_record" "workers" {
   count = "${var.worker_count}"
 
   # DNS zone where record should be created
@@ -8,34 +8,21 @@ resource "digitalocean_record" "workers" {
   name  = "${var.cluster_name}-workers"
   type  = "A"
   ttl   = 300
-  value = "${element(digitalocean_droplet.workers.*.ipv4_address, count.index)}"
+  value = "${element(hcloud_server.workers.*.ipv4_address, count.index)}"
 }
 
 # Worker droplet instances
-resource "digitalocean_droplet" "workers" {
+resource "hcloud_server" "workers" {
   count = "${var.worker_count}"
 
-  name   = "${var.cluster_name}-worker-${count.index}"
-  region = "${var.region}"
+  name     = "${var.cluster_name}-worker-${count.index}"
+  location = "${var.location}"
 
-  image = "${var.image}"
-  size  = "${var.worker_type}"
-
-  # network
-  ipv6               = true
-  private_networking = true
+  image       = "${var.image}"
+  server_type = "${var.worker_type}"
 
   user_data = "${data.ct_config.worker_ign.rendered}"
   ssh_keys  = ["${var.ssh_fingerprints}"]
-
-  tags = [
-    "${digitalocean_tag.workers.id}",
-  ]
-}
-
-# Tag to label workers
-resource "digitalocean_tag" "workers" {
-  name = "${var.cluster_name}-worker"
 }
 
 # Worker Container Linux Config

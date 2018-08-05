@@ -4,8 +4,12 @@ terraform {
   required_version = ">= 0.11.0"
 }
 
-provider "digitalocean" {
-  version = "~> 0.1.2"
+provider "hcloud" {
+  version = "~> 1.2.0"
+}
+
+provider "cloudflare" {
+  version = "~> 1.1.0"
 }
 
 provider "local" {

@@ -1,5 +1,5 @@
 # Controller Instance DNS records
-resource "digitalocean_record" "controllers" {
+resource "cloudflare_record" "controllers" {
   count = "${var.controller_count}"
 
   # DNS zone where record should be created
@@ -11,11 +11,11 @@ resource "digitalocean_record" "controllers" {
   ttl  = 300
 
   # IPv4 addresses of controllers
-  value = "${element(digitalocean_droplet.controllers.*.ipv4_address, count.index)}"
+  value = "${element(hcloud_server.controllers.*.ipv4_address, count.index)}"
 }
 
 # Discrete DNS records for each controller's private IPv4 for etcd usage
-resource "digitalocean_record" "etcds" {
+resource "cloudflare_record" "etcds" {
   count = "${var.controller_count}"
 
   # DNS zone where record should be created
@@ -27,34 +27,21 @@ resource "digitalocean_record" "etcds" {
   ttl  = 300
 
   # private IPv4 address for etcd
-  value = "${element(digitalocean_droplet.controllers.*.ipv4_address_private, count.index)}"
+  value = "${element(hcloud_server.controllers.*.ipv4_address, count.index)}"
 }
 
 # Controller droplet instances
-resource "digitalocean_droplet" "controllers" {
+resource "hcloud_server" "controllers" {
   count = "${var.controller_count}"
 
-  name   = "${var.cluster_name}-controller-${count.index}"
-  region = "${var.region}"
+  name     = "${var.cluster_name}-controller-${count.index}"
+  location = "${var.location}"
 
-  image = "${var.image}"
-  size  = "${var.controller_type}"
-
-  # network
-  ipv6               = true
-  private_networking = true
+  image       = "${var.image}"
+  server_type = "${var.controller_type}"
 
   user_data = "${element(data.ct_config.controller_ign.*.rendered, count.index)}"
   ssh_keys  = ["${var.ssh_fingerprints}"]
-
-  tags = [
-    "${digitalocean_tag.controllers.id}",
-  ]
-}
-
-# Tag to label controllers
-resource "digitalocean_tag" "controllers" {
-  name = "${var.cluster_name}-controller"
 }
 
 # Controller Container Linux Config
