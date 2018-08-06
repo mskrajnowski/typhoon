@@ -1,3 +1,11 @@
+# Add SSH keys to hcloud
+resource "hcloud_ssh_key" "key" {
+  count = "${length(var.ssh_keys)}"
+
+  name       = "${element(keys(var.ssh_keys), count.index)}"
+  public_key = "${element(values(var.ssh_keys), count.index)}"
+}
+
 # Secure copy etcd TLS assets and kubeconfig to controllers. Activates kubelet.service
 resource "null_resource" "copy-controller-secrets" {
   count = "${var.controller_count}"

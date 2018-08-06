@@ -60,9 +60,9 @@ variable "worker_clc_snippets" {
 
 # configuration
 
-variable "ssh_fingerprints" {
-  type        = "list"
-  description = "SSH public key fingerprints. (e.g. see `ssh-add -l -E md5`)"
+variable "ssh_keys" {
+  type        = "map"
+  description = "SSH public keys"
 }
 
 variable "asset_dir" {

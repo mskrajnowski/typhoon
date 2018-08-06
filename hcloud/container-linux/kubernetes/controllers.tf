@@ -40,8 +40,41 @@ resource "hcloud_server" "controllers" {
   image       = "${var.image}"
   server_type = "${var.controller_type}"
 
-  user_data = "${element(data.ct_config.controller_ign.*.rendered, count.index)}"
-  ssh_keys  = ["${var.ssh_fingerprints}"]
+  rescue   = "linux64"
+  ssh_keys = ["${hcloud_ssh_key.key.*.name}"]
+
+  provisioner "remote-exec" {
+    inline = [
+      "mkdir -p /mnt/oem /mnt/boot /mnt/root",
+      "mount /dev/sda1 /mnt/boot",
+      "mount /dev/sda6 /mnt/oem",
+      "mount /dev/sda9 /mnt/root",
+      "touch /mnt/boot/coreos/first_boot",
+      "mkdir -p /mnt/root/etc/metadata",
+    ]
+  }
+
+  provisioner "file" {
+    content     = "${element(data.ct_config.controller_ign.*.rendered, count.index)}"
+    destination = "/mnt/oem/config.ign"
+  }
+
+  provisioner "file" {
+    content     = "COREOS_CUSTOM_PUBLIC_IPV4=${self.ipv4_address}"
+    destination = "/mnt/root/etc/metadata/coreos"
+  }
+
+  provisioner "remote-exec" {
+    inline = ["reboot"]
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      user = "core"
+    }
+
+    inline = []
+  }
 }
 
 # Controller Container Linux Config
@@ -51,6 +84,8 @@ data "template_file" "controller_config" {
   template = "${file("${path.module}/cl/controller.yaml.tmpl")}"
 
   vars = {
+    ssh_keys = "${join("\n", values(var.ssh_keys))}"
+
     # Cannot use cyclic dependencies on controllers or their DNS records
     etcd_name   = "etcd${count.index}"
     etcd_domain = "${var.cluster_name}-etcd${count.index}.${var.dns_zone}"
