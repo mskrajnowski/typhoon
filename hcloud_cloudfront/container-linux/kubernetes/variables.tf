@@ -10,6 +10,8 @@ variable "location" {
   description = "Hetzner Cloud location (e.g. fsn1, nbg1, hel1)"
 }
 
+# Cloudflare
+
 variable "dns_zone" {
   type        = "string"
   description = "Cloudflare domain (e.g. k8s.example.com)"
